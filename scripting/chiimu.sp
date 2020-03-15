@@ -12,6 +12,10 @@
 int g_iLoadedNamesCount = 0;
 char g_sNames[NAMES_CAPACITY][NAMES_LINE_CAPACITY];
 
+char g_sRedTeamName[NAMES_LINE_CAPACITY];
+char g_sBlueTeamName[NAMES_LINE_CAPACITY];
+
+Handle g_hTournamentEnabled = INVALID_HANDLE;
 Handle g_hRedTeamName = INVALID_HANDLE;
 Handle g_hBlueTeamName = INVALID_HANDLE;
 
@@ -28,8 +32,9 @@ public void OnPluginStart()
 {
 	g_hRedTeamName = FindConVar("mp_tournament_redteamname");
 	g_hBlueTeamName = FindConVar("mp_tournament_blueteamname");
+	g_hTournamentEnabled = FindConVar("mp_tournament");
 	
-	if (g_hRedTeamName == INVALID_HANDLE || g_hBlueTeamName == INVALID_HANDLE)
+	if (g_hRedTeamName == INVALID_HANDLE || g_hBlueTeamName == INVALID_HANDLE || g_hTournamentEnabled == INVALID_HANDLE)
 	{
 		SetFailState("Unable to find mp_tournament_redteamname or mp_tournament_blueteamname ConVars");
 	}
@@ -39,7 +44,26 @@ public void OnPluginStart()
 
 public void OnMapStart()
 {
-	CreateTimer(1.0, Timer_SetTeamNames);
+	SetRedTeamName();
+	SetBlueTeamName();
+}
+
+public void OnClientPutInServer(int client)
+{
+	if (IsClientInGame(client) && !IsFakeClient(client))
+	{
+		SendConVarValue(client, g_hTournamentEnabled, "1");
+
+		CreateTimer(1.0, Timer_SetTeamNames);
+	}
+}
+
+public Action Timer_SetTeamNames(Handle timer)
+{
+	SetConVarString(g_hRedTeamName, g_sRedTeamName, true, true);
+	SetConVarString(g_hBlueTeamName, g_sBlueTeamName, true, true);
+
+	return Plugin_Handled;
 }
 
 stock void LoadNames()
@@ -88,17 +112,13 @@ stock void SetRedTeamName()
 	char current[NAMES_LINE_CAPACITY];
 	GetConVarString(g_hRedTeamName, current, NAMES_LINE_CAPACITY);
 
-	char newName[NAMES_LINE_CAPACITY];
-
 	do
 	{
-		int idx = GetRandomInt(0, g_iLoadedNamesCount);
+		int idx = GetRandomInt(0, g_iLoadedNamesCount - 1);
 
-		strcopy(newName, NAMES_LINE_CAPACITY, g_sNames[idx]);
+		strcopy(g_sRedTeamName, NAMES_LINE_CAPACITY, g_sNames[idx]);
 	}
-	while (StrEqual(newName, current, false));
-
-	SetConVarString(g_hRedTeamName, newName, true, true);
+	while (StrEqual(g_sRedTeamName, current, false));
 }
 
 stock void SetBlueTeamName()
@@ -106,26 +126,11 @@ stock void SetBlueTeamName()
 	char current[NAMES_LINE_CAPACITY];
 	GetConVarString(g_hBlueTeamName, current, NAMES_LINE_CAPACITY);
 
-	char redTeamName[NAMES_LINE_CAPACITY];
-	GetConVarString(g_hRedTeamName, redTeamName, NAMES_LINE_CAPACITY);
-
-	char newName[NAMES_LINE_CAPACITY];
-
 	do
 	{
-		int idx = GetRandomInt(0, g_iLoadedNamesCount);
+		int idx = GetRandomInt(0, g_iLoadedNamesCount - 1);
 
-		strcopy(newName, NAMES_LINE_CAPACITY, g_sNames[idx]);
+		strcopy(g_sBlueTeamName, NAMES_LINE_CAPACITY, g_sNames[idx]);
 	}
-	while (StrEqual(newName, current, false) || StrEqual(newName, redTeamName, false));
-
-	SetConVarString(g_hBlueTeamName, newName, true, true);
-}
-
-public Action Timer_SetTeamNames(Handle timer)
-{
-	SetRedTeamName();
-	SetBlueTeamName();
-
-	return Plugin_Handled;
+	while (StrEqual(g_sBlueTeamName, current, false) || StrEqual(g_sBlueTeamName, g_sRedTeamName, false));
 }
