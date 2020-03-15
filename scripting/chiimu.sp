@@ -26,14 +26,14 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-    g_hRedTeamName = FindConVar("mp_tournament_redteamname");
-    g_hBlueTeamName = FindConVar("mp_tournament_blueteamname");
-    
-    if (g_hRedTeamName == INVALID_HANDLE || g_hBlueTeamName == INVALID_HANDLE)
-    {
-        SetFailState("Unable to find mp_tournament_redteamname or mp_tournament_blueteamname ConVars");
-    }
-
+	g_hRedTeamName = FindConVar("mp_tournament_redteamname");
+	g_hBlueTeamName = FindConVar("mp_tournament_blueteamname");
+	
+	if (g_hRedTeamName == INVALID_HANDLE || g_hBlueTeamName == INVALID_HANDLE)
+	{
+		SetFailState("Unable to find mp_tournament_redteamname or mp_tournament_blueteamname ConVars");
+	}
+	
 	LoadNames();
 }
 
@@ -48,7 +48,7 @@ stock void LoadNames()
 	char path[128];
 	BuildPath(Path_SM, path, sizeof(path), "data/chiimu/names.txt");
 
-	Handle file = OpenFile(manifestPath, "r");
+	Handle file = OpenFile(path, "r");
 
 	if (file == INVALID_HANDLE)
 	{
@@ -84,7 +84,7 @@ stock void LoadNames()
 	}
 }
 
-stock SetRedTeamName()
+stock void SetRedTeamName()
 {
 	char current[NAMES_LINE_CAPACITY];
 	GetConVarString(g_hRedTeamName, current, NAMES_LINE_CAPACITY);
@@ -102,7 +102,7 @@ stock SetRedTeamName()
 	SetConVarString(g_hRedTeamName, newName, true, true);
 }
 
-stock SetBlueTeamName()
+stock void SetBlueTeamName()
 {
 	char current[NAMES_LINE_CAPACITY];
 	GetConVarString(g_hBlueTeamName, current, NAMES_LINE_CAPACITY);
