@@ -39,8 +39,7 @@ public void OnPluginStart()
 
 public void OnMapStart()
 {
-	SetRedTeamName();
-	SetBlueTeamName();
+	CreateTimer(1.0, Timer_SetTeamNames);
 }
 
 stock void LoadNames()
@@ -121,4 +120,12 @@ stock void SetBlueTeamName()
 	while (StrEqual(newName, current, false) || StrEqual(newName, redTeamName, false));
 
 	SetConVarString(g_hBlueTeamName, newName, true, true);
+}
+
+public Action Timer_SetTeamNames(Handle timer)
+{
+	SetRedTeamName();
+	SetBlueTeamName();
+
+	return Plugin_Handled;
 }
