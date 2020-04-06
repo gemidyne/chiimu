@@ -6,7 +6,7 @@
 
 #define PLUGIN_VERSION "1.0.0"
 
-#define NAMES_CAPACITY 256
+#define NAMES_CAPACITY 512
 #define NAMES_LINE_CAPACITY 64
 
 int g_iLoadedNamesCount = 0;
